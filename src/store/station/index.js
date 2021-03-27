@@ -38,6 +38,7 @@ const actions = {
         commit(types.M_STATION_FAILED, err);
       });
   },
+  // !
   fetchDetailStation({ commit }, id) {
     commit(types.M_STATION_REQUEST);
     api

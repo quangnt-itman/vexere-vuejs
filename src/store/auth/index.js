@@ -10,22 +10,22 @@ const state = {
 };
 
 const mutations = {
-  loginRequest(state) {
+  loginRequest ( state ) {
     state.token = null;
     state.err = null;
     state.loading = true;
   },
-  loginSuccess(state, payload) {
+  loginSuccess ( state, payload ) {
     state.token = payload;
     state.err = null;
     state.loading = false;
   },
-  loginFailed(state, payload) {
+  loginFailed ( state, payload ) {
     state.token = null;
     state.err = payload;
     state.loading = false;
   },
-  clearAuth(state) {
+  clearAuth ( state ) {
     state.token = null;
     state.err = null;
     state.loading = false;
@@ -33,63 +33,63 @@ const mutations = {
 };
 
 const actions = {
-  actLogin({ commit, dispatch }, authData) {
-    commit("loginRequest");
+  actLogin ( { commit, dispatch }, authData ) {
+    commit( "loginRequest" );
     api
-      .post("/users/login", {
+      .post( "/users/login", {
         email: authData.email,
         password: authData.password,
-      })
-      .then((result) => {
-        commit("loginSuccess", result.data.token);
+      } )
+      .then( ( result ) => {
+        commit( "loginSuccess", result.data.token );
 
-        const user = jwtDecode(result.data.token);
-        if (user.userType === "client") {
-          return Promise.reject({
+        const user = jwtDecode( result.data.token );
+        if ( user.userType === "client" ) {
+          return Promise.reject( {
             response: { data: { message: "Ban k co quyen truy cap" } },
-          });
+          } );
         }
-        const exp = (user.exp - user.iat) * 1000;
+        const exp = ( user.exp - user.iat ) * 1000;
 
         //lưu token xuống localStorage
-        localStorage.setItem("token", result.data.token);
-        localStorage.setItem("exp", user.exp);
-        dispatch("setTimeoutLogout", exp);
-        setHeader(result.data.token);
+        localStorage.setItem( "token", result.data.token );
+        localStorage.setItem( "exp", user.exp );
+        dispatch( "setTimeoutLogout", exp );
+        setHeader( result.data.token );
         //chuyển hướng vào dashboard
-        router.replace("/admin/dashboard");
-      })
-      .catch((err) => {
-        commit("loginFailed", err);
-      });
+        router.replace( "/admin/dashboard" );
+      } )
+      .catch( ( err ) => {
+        commit( "loginFailed", err );
+      } );
   },
 
-  actLogout({ commit }) {
-    commit("clearAuth");
-    localStorage.removeItem("token");
-    localStorage.removeItem("exp");
-    router.replace("/auth");
+  actLogout ( { commit } ) {
+    commit( "clearAuth" );
+    localStorage.removeItem( "token" );
+    localStorage.removeItem( "exp" );
+    router.replace( "/auth" );
   },
 
-  setTimeoutLogout({ dispatch }, exp) {
-    setTimeout(() => {
-      dispatch("actLogout");
-    }, exp);
+  setTimeoutLogout ( { dispatch }, exp ) {
+    setTimeout( () => {
+      dispatch( "actLogout" );
+    }, exp );
   },
 
-  actTryLogin({ commit, dispatch }) {
-    const token = localStorage.getItem("token");
-    if (!token) {
+  actTryLogin ( { commit, dispatch } ) {
+    const token = localStorage.getItem( "token" );
+    if ( !token ) {
       return;
     }
-    const exp = localStorage.getItem("exp");
+    const exp = localStorage.getItem( "exp" );
     const date = new Date();
-    if (date.getTime() > exp * 1000) {
-      dispatch("actLogout");
+    if ( date.getTime() > exp * 1000 ) {
+      dispatch( "actLogout" );
       return;
     }
-    setHeader(token);
-    commit("loginSuccess", token);
+    setHeader( token );
+    commit( "loginSuccess", token );
   },
 };
 
